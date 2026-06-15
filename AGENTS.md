@@ -5,6 +5,7 @@ This workspace uses the Codex agentic development workflow documented in `.codex
 ## Default Operating Model
 
 - Work from Jira summary, description, and attachments first; read these automatically during Jira intake without asking for approval.
+- For Jira intake via Atlassian MCP, do not repeat tool discovery when the known tools are available: `jira_get_issue`, `jira_download_attachments`; Jira comments are read through `jira_get_issue(comment_limit=...)`, and comment create/update uses Jira REST fallback when MCP write tools are not exposed.
 - Use controlled autonomy: analyze, grill, plan, and update the Jira Development Log; wait for user approval before starting implementation.
 - During implementation, continue autonomously unless blocked; if an implementation-impacting ambiguity appears, return to the Grill-Me Gate and ask the user.
 - Ask before opening PRs, rerunning Jenkins, merging, or handing off to QA.

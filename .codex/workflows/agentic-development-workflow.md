@@ -8,6 +8,8 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
 
 1. Jira Intake
    - Read Jira summary, description, and all attachments automatically; do not ask for approval for these reads.
+   - Use known Atlassian MCP tools directly when available; do not spend time rediscovering them on every Jira.
+   - Known Jira MCP read tools: `jira_get_issue` for summary, description, comments via `comment_limit`, status, and attachment metadata; `jira_download_attachments` for attachment content.
    - Treat attachments as first-class requirements sources, especially PDFs, images, spreadsheets, and analysis documents.
    - Extract acceptance criteria from summary, description, and attachments; if Jira fields are sparse, inspect attachments before asking the user.
    - Use comments or linked issues only when acceptance criteria are ambiguous or explicitly reference them.
@@ -29,10 +31,12 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
 
 4. Jira Single Comment Log
    - Create or update one Jira comment titled `Codex Development Log`.
+   - Read existing comments with `jira_get_issue(comment_limit=...)` and find the `codex-development-log:v1` marker before creating a new comment.
    - Do not create progress-comment spam.
    - Format the comment with Jira wiki markup: `h2.`, `h3.`, Jira tables, numbered lists, and compact bullets.
    - Include the internal execution slices and the physical Jira sub-task decision in the comment.
    - Update the same comment after planning, implementation, test execution, self-review, PR creation, Jenkins result, and QA handoff.
+   - If Jira MCP comment write/update tools are not exposed, use Jira REST fallback: `POST /rest/api/2/issue/{issueKey}/comment` to create and `PUT /rest/api/2/issue/{issueKey}/comment/{commentId}` to update.
    - Use the Jira wiki template in `.codex/templates/jira-development-log.jira`.
 
 5. Approval Gate
@@ -62,6 +66,17 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
    - Check Jenkins after PR approval or when the user asks.
    - Classify failures as compile, test, dependency, Sonar, Fortify, packaging, or deploy.
    - If Jenkins passes, prepare QA handoff notes from acceptance criteria and risk areas.
+
+## Jira MCP Defaults
+
+- Prefer native exposed Jira MCP tools when the session provides them.
+- If native MCP tools are not exposed, read repo-local `.codex/mcp.toml` and use the configured fallback source without printing tokens.
+- Skip repeated `tools/list` discovery unless a known tool call fails or the MCP server changes.
+- Use `jira_get_issue` first with fields for summary, description, attachment metadata, status, issue type, priority, assignee, reporter, labels, components, and fix versions; set `comment_limit` when comments are needed.
+- Use `jira_get_issue(comment_limit=...)` to read Jira comments and locate the existing `codex-development-log:v1` comment marker.
+- Use `jira_download_attachments` only after issue metadata confirms attachments exist.
+- Jira MCP currently exposes comment reading through `jira_get_issue`, not dedicated comment write/update tools; use Jira REST fallback for creating/updating the single development log comment when needed.
+- Never log MCP headers, personal tokens, or raw secret config values.
 
 ## Quality Gate Defaults
 

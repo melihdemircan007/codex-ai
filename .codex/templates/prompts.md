@@ -2,7 +2,11 @@
 
 ## Jira Analysis
 
-Analyze this Jira by reading summary, description, and attachments first without asking for approval. Extract acceptance criteria, target behavior, scope, out-of-scope areas, ambiguity, affected services/modules, internal execution slices, the physical Jira sub-task decision, and test scenarios. Do not implement yet.
+Analyze this Jira by reading summary, description, and attachments first without asking for approval. Use known Atlassian MCP tools directly when available: `jira_get_issue` for issue fields/comments via `comment_limit`/attachment metadata and `jira_download_attachments` for attachment content. Do not repeat MCP tool discovery unless the known calls fail. Extract acceptance criteria, target behavior, scope, out-of-scope areas, ambiguity, affected services/modules, internal execution slices, the physical Jira sub-task decision, and test scenarios. Do not implement yet.
+
+## Jira MCP Intake
+
+Use `jira_get_issue` first for summary, description, comments via `comment_limit`, status, issue type, priority, assignee, reporter, labels, components, fix versions, and attachment metadata. Use `jira_download_attachments` second only when attachments exist. For Jira Development Log comments, read existing comments with `jira_get_issue(comment_limit=...)` and locate `codex-development-log:v1`; if MCP comment write/update tools are not exposed, use Jira REST fallback: `POST /rest/api/2/issue/{issueKey}/comment` and `PUT /rest/api/2/issue/{issueKey}/comment/{commentId}`. Do not print MCP headers, tokens, or raw secret config values.
 
 ## Execution Slice Decision
 
@@ -14,7 +18,7 @@ Grill this plan before implementation. Ask one implementation-impacting question
 
 ## Jira Comment
 
-Create or update a single Jira comment titled Codex Development Log. Use Jira wiki markup, not GitHub Markdown: h2/h3 headers, Jira tables, numbered lists, and compact bullets. Include internal execution slices and the physical Jira sub-task decision. Preserve the codex-development-log:v1 marker so the comment can be updated later.
+Create or update a single Jira comment titled Codex Development Log. Read existing comments with `jira_get_issue(comment_limit=...)` and update the comment containing `codex-development-log:v1`; create a new comment only if the marker does not exist. Use Jira wiki markup, not GitHub Markdown: h2/h3 headers, Jira tables, numbered lists, and compact bullets. Include internal execution slices and the physical Jira sub-task decision. Preserve the `codex-development-log:v1` marker so the comment can be updated later.
 
 ## Approval Gate
 
