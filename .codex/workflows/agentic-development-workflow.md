@@ -19,8 +19,16 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
    - Always run this as a visible checkpoint after Jira Intake and before Technical Plan.
    - If previous Grill-Me decisions exist for the Jira or current session, list them first and mark them as reused decisions.
    - Check whether any new implementation-impacting ambiguity remains after Jira summary, description, attachments, comments, and repo patterns are reviewed.
+   - Treat any implementation choice that changes behavior, permissions, API contract, persistence rules, rollout, ownership, or QA expectations as an implementation-impacting decision unless the Jira or existing repo pattern already fixes it unambiguously.
    - If ambiguity remains, ask one critical question at a time and include a recommended answer for each question.
+   - A recommended answer is only a recommendation; never record it as `Final Decision`, Jira log decision, or plan assumption until the user explicitly approves it or the decision is proven by existing repo/Jira evidence.
+   - Do not collapse an unresolved recommended answer into `No new implementation-impacting ambiguity found`.
    - If no new ambiguity remains, explicitly record: `No new implementation-impacting ambiguity found`.
+   - Before leaving the Grill-Me Gate, run a visible Decision Ledger:
+     - `Confirmed decisions`: user-approved or directly proven decisions.
+     - `Recommended but unconfirmed`: recommendations still waiting for user approval.
+     - `No-question rationale`: why any apparent decision did not require a question.
+   - Proceed to Technical Plan only when `Recommended but unconfirmed` is empty, or when the user explicitly says to proceed with those recommendations.
    - Never ask questions that can be answered by reading the repo, configs, tests, Jenkinsfile, or existing patterns.
    - Stop grilling when the user says to wrap up, proceed, or when all implementation-impacting ambiguity is closed.
 
@@ -28,6 +36,7 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
    - Break the work into internal execution slices by deliverable or behavior, not by individual files.
    - Use execution slices such as Backend API, Admin Backend Proxy, Frontend UI, Validation, Permission/Config, Tests, Self Review, PR/Jenkins, and QA Handoff when they fit the Jira.
    - For each execution slice, capture changed behavior, files/modules likely affected, tests to add/update, risks, and acceptance criteria coverage.
+   - Link plan assumptions back to Confirmed decisions or repo/Jira evidence. Do not introduce new unconfirmed implementation choices in the Technical Plan; return to the Grill-Me Gate if one appears.
    - Default to keeping one Jira issue and one Jira Development Log; do not create physical Jira sub-tasks by default.
    - Recommend physical Jira sub-tasks only when the work needs multiple people/teams, multiple PRs, independent deliverables, separate QA/DevOps tracking, or risky rollout tracking.
    - Prefer the smallest change that satisfies the acceptance criteria.
@@ -38,6 +47,8 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
    - Do not create progress-comment spam.
    - Format the comment with Jira wiki markup: `h2.`, `h3.`, Jira tables, numbered lists, and compact bullets.
    - Include the internal execution slices and the physical Jira sub-task decision in the comment.
+   - In the Grill-Me section, keep `Final Decision` empty or `Pending user confirmation` for any recommendation that the user has not explicitly approved.
+   - Do not mark `Grill-Me completed` in the Work Done table while any Grill-Me decision is pending user confirmation.
    - Update the same comment after planning, implementation, test execution, self-review, PR creation, Jenkins result, and QA handoff.
    - If Jira MCP comment write/update tools are not exposed, use Jira REST fallback: `POST /rest/api/2/issue/{issueKey}/comment` to create and `PUT /rest/api/2/issue/{issueKey}/comment/{commentId}` to update.
    - Use the Jira wiki template in `.codex/templates/jira-development-log.jira`.
@@ -73,7 +84,8 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
 ## Jira MCP Defaults
 
 - Prefer native exposed Jira MCP tools when the session provides them.
-- If native MCP tools are not exposed, read repo-local `.codex/mcp.toml` and use the configured fallback source without printing tokens.
+- If native MCP tools are not exposed, read repo-local `.codex/mcp.toml` and Codex-owned MCP configuration only; do not read Cursor MCP configuration or other IDE-specific configs.
+- When a direct MCP/REST fallback is needed, use Codex-owned secret sources such as the configured `token_env` or `~/.codex/config.toml` without printing tokens.
 - Skip repeated `tools/list` discovery unless a known tool call fails or the MCP server changes.
 - Use `jira_get_issue` first with fields for summary, description, attachment metadata, status, issue type, priority, assignee, reporter, labels, components, and fix versions; set `comment_limit` when comments are needed.
 - Use `jira_get_issue(comment_limit=...)` to read Jira comments and locate the existing `codex-development-log:v1` comment marker.

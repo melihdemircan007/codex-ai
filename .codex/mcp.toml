@@ -7,8 +7,3 @@ jira_url = "https://jira.turkcell.com.tr"
 
 # Preferred secret source. The actual token must stay outside the repo.
 token_env = "JIRA_PERSONAL_TOKEN"
-
-# Optional fallback source for local development. Codex can read this file when
-# native MCP tools are not exposed, but the token still remains outside the repo.
-fallback_cursor_config = "/Users/tcmedemircan/.cursor/mcp.json"
-fallback_cursor_server = "atlassian"
