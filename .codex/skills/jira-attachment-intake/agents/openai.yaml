@@ -1,4 +1,0 @@
-interface:
-  display_name: "Jira Attachment Intake"
-  short_description: "Extract text from Jira PDF attachments during intake."
-  default_prompt: "Use this skill to parse embedded/base64 Jira PDF attachment content or local PDFs and extract text for requirements analysis."
