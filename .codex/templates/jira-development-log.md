@@ -11,9 +11,11 @@
 - Out of scope:
 - Open questions:
 
-### Grill-Me Decisions
-- Decision 1:
-- Decision 2:
+### Grill-Me Gate
+- Previous decisions:
+- Reused decisions:
+- New ambiguity check: No new implementation-impacting ambiguity found / Questions required
+- Questions / decisions:
 
 ### Technical Plan
 - Affected service/module:

@@ -14,7 +14,7 @@ Break the work into internal execution slices by deliverable or behavior, not by
 
 ## Grill-Me
 
-Grill this plan before implementation. Ask one implementation-impacting question at a time. For each question, include your recommended answer. Do not ask anything that can be discovered from the repo.
+Run Grill-Me as a visible checkpoint after Jira Intake and before Technical Plan. First list previous decisions if they exist and mark them as reused. Then check whether any new implementation-impacting ambiguity remains after Jira summary, description, attachments, comments, and repo patterns are reviewed. If ambiguity remains, ask one implementation-impacting question at a time and include your recommended answer. If no ambiguity remains, explicitly write `No new implementation-impacting ambiguity found`. Do not ask anything that can be discovered from the repo.
 
 ## Jira Comment
 

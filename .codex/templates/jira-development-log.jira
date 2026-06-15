@@ -14,9 +14,15 @@ h3. Jira Analysis
 | Out of scope |  |
 | Open questions |  |
 
-h3. Grill-Me Decisions
-|| # || Karar ||
-| 1 |  |
+h3. Grill-Me Gate
+|| Alan || Değer ||
+| Previous decisions |  |
+| Reused decisions |  |
+| New ambiguity check | No new implementation-impacting ambiguity found / Questions required |
+
+h4. Grill-Me Questions / Decisions
+|| # || Soru / Karar || Recommended Answer || Final Decision ||
+| 1 |  |  |  |
 
 h3. Technical Plan
 || Alan || Değer ||

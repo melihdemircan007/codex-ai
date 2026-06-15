@@ -9,7 +9,7 @@ This workspace uses the Codex agentic development workflow documented in `.codex
 - Use controlled autonomy: analyze, grill, plan, and update the Jira Development Log; wait for user approval before starting implementation.
 - During implementation, continue autonomously unless blocked; if an implementation-impacting ambiguity appears, return to the Grill-Me Gate and ask the user.
 - Ask before opening PRs, rerunning Jenkins, merging, or handing off to QA.
-- Before implementation, run the Grill-Me Gate to close important ambiguity.
+- Before implementation, run the Grill-Me Gate as a visible checkpoint: list previous decisions, check for new ambiguity, and ask only if needed.
 - Keep one Jira comment updated as the source of truth for plan, progress, tests, review notes, PR/Jenkins status, and QA handoff.
 - Default to internal execution slices instead of physical Jira sub-tasks.
 - Recommend physical Jira sub-tasks only when multiple people/teams, multiple PRs, independent deliverables, separate QA/DevOps tracking, or risky rollout tracking is needed.

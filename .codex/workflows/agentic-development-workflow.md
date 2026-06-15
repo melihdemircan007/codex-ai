@@ -16,8 +16,11 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
    - Identify affected service/module, expected behavior, scope boundaries, and likely test impact.
 
 2. Grill-Me Gate
-   - Before coding, ask one critical question at a time when product or technical intent is unclear.
-   - Provide a recommended answer for each question.
+   - Always run this as a visible checkpoint after Jira Intake and before Technical Plan.
+   - If previous Grill-Me decisions exist for the Jira or current session, list them first and mark them as reused decisions.
+   - Check whether any new implementation-impacting ambiguity remains after Jira summary, description, attachments, comments, and repo patterns are reviewed.
+   - If ambiguity remains, ask one critical question at a time and include a recommended answer for each question.
+   - If no new ambiguity remains, explicitly record: `No new implementation-impacting ambiguity found`.
    - Never ask questions that can be answered by reading the repo, configs, tests, Jenkinsfile, or existing patterns.
    - Stop grilling when the user says to wrap up, proceed, or when all implementation-impacting ambiguity is closed.
 
