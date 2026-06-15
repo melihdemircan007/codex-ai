@@ -10,6 +10,8 @@ This workspace uses the Codex agentic development workflow documented in `.codex
 - Ask before opening PRs, rerunning Jenkins, merging, or handing off to QA.
 - Before implementation, run the Grill-Me Gate to close important ambiguity.
 - Keep one Jira comment updated as the source of truth for plan, progress, tests, review notes, PR/Jenkins status, and QA handoff.
+- Default to internal execution slices instead of physical Jira sub-tasks.
+- Recommend physical Jira sub-tasks only when multiple people/teams, multiple PRs, independent deliverables, separate QA/DevOps tracking, or risky rollout tracking is needed.
 - Do not store Jira, Bitbucket, Jenkins, or other tokens in repo files or chat-visible logs.
 
 ## Verification Defaults

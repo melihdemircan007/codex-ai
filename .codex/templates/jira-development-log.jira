@@ -21,16 +21,19 @@ h3. Grill-Me Decisions
 h3. Technical Plan
 || Alan || Değer ||
 | Affected service/module |  |
+| Jira sub-task decision | No physical Jira sub-tasks required / Physical Jira sub-tasks recommended because ... |
 | Test strategy |  |
 
-h4. Subtasks
-* 
+h4. Execution Slices
+|| # || Slice || Deliverable / Behavior || Status || Notes ||
+| 1 |  |  | Planned |  |
 
 h3. Work Done
 || Durum || İş ||
 | ( )| Jira summary, description, and attachments analyzed |
 | ( )| Grill-Me completed |
 | ( )| Technical plan completed |
+| ( )| Jira sub-task decision recorded |
 | ( )| User approved implementation |
 | ( )| Code changes completed |
 | ( )| Unit/integration tests added or updated |

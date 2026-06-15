@@ -17,13 +17,15 @@
 
 ### Technical Plan
 - Affected service/module:
-- Subtasks:
+- Jira sub-task decision: No physical Jira sub-tasks required / Physical Jira sub-tasks recommended because ...
+- Execution slices:
 - Test strategy:
 
 ### Work Done
 - [ ] Jira summary, description, and attachments analyzed
 - [ ] Grill-Me completed
 - [ ] Technical plan completed
+- [ ] Jira sub-task decision recorded
 - [ ] User approved implementation
 - [ ] Code changes completed
 - [ ] Unit/integration tests added or updated
