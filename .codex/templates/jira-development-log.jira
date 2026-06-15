@@ -1,0 +1,70 @@
+h2. Codex Development Log
+
+{noformat}
+codex-development-log:v1
+{noformat}
+
+h3. Jira Analysis
+|| Alan || Değer ||
+| Summary |  |
+| Description findings |  |
+| Attachment findings |  |
+| AC summary |  |
+| Scope |  |
+| Out of scope |  |
+| Open questions |  |
+
+h3. Grill-Me Decisions
+|| # || Karar ||
+| 1 |  |
+
+h3. Technical Plan
+|| Alan || Değer ||
+| Affected service/module |  |
+| Test strategy |  |
+
+h4. Subtasks
+* 
+
+h3. Work Done
+|| Durum || İş ||
+| ( )| Jira summary, description, and attachments analyzed |
+| ( )| Grill-Me completed |
+| ( )| Technical plan completed |
+| ( )| User approved implementation |
+| ( )| Code changes completed |
+| ( )| Unit/integration tests added or updated |
+| ( )| Local targeted tests passed |
+| ( )| Module build passed |
+| ( )| Self-review completed |
+| ( )| PR opened |
+| ( )| Jenkins passed |
+| ( )| Sent to QA |
+
+h3. Test Results
+|| Alan || Değer ||
+| Command |  |
+| Result |  |
+| Notes |  |
+
+h3. Self Review Notes
+|| Alan || Değer ||
+| Findings |  |
+| Fixes applied |  |
+| Remaining risks |  |
+
+h3. PR / Jenkins
+|| Alan || Değer ||
+| PR |  |
+| Jenkins build |  |
+| Status |  |
+
+h3. QA Handoff
+h4. Test Scenarios
+# 
+
+h4. Test Data
+* 
+
+h4. Risky Areas
+* 
