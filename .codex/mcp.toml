@@ -1,9 +1,0 @@
-# Repo-local MCP source definition for Codex workflow.
-# Do not put real tokens in this file.
-
-[atlassian]
-url = "https://mcp-atlassian.turkcell.com.tr/mcp"
-jira_url = "https://jira.turkcell.com.tr"
-
-# Preferred secret source. The actual token must stay outside the repo.
-token_env = "JIRA_PERSONAL_TOKEN"

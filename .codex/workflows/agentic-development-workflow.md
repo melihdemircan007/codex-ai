@@ -9,17 +9,26 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
 1. Jira Intake
    - Read Jira summary, description, and all attachments automatically; do not ask for approval for these reads.
    - Use known Atlassian MCP tools directly when available; do not spend time rediscovering them on every Jira.
-   - Known Jira MCP read tools: `jira_get_issue` for summary, description, comments via `comment_limit`, status, and attachment metadata; `jira_download_attachments` for attachment content.
+   - Known Jira MCP read tools: `jira_get_issue` for summary, description, comments via `comment_limit`, status, and attachment metadata. Use `jira_download_attachments` only as a fallback for attachment content when direct helper download or local files are unavailable.
    - Treat attachments as first-class requirements sources, especially PDFs, images, spreadsheets, and analysis documents.
+   - When Jira attachment metadata includes a PDF (`application/pdf` or `.pdf` filename), use the repo-local `jira-attachment-intake` skill at `.codex/skills/jira-attachment-intake` and run its `scripts/jira_pdf_intake.py` helper to create a local PDF copy and extracted `.txt` before Grill-Me Gate.
+   - Prefer `jira_pdf_intake.py --attachment-url ...` using the attachment URL from Jira metadata. This avoids emitting large MCP embedded/base64 PDF blobs into the chat/tool transcript.
+   - Use Jira credentials only from environment variables (`JIRA_PERSONAL_TOKEN`, `JIRA_BASE_URL`) or Codex-owned MCP config explicitly passed to the helper; never print token values or raw config headers.
+   - If direct helper download is unavailable and `jira_download_attachments` returns an embedded/base64 resource instead of a local file, do not treat the PDF as analyzed until `jira_pdf_intake.py` or an equivalent deterministic extractor has produced readable text. If the extractor reports `no_text`, explicitly record that OCR/manual inspection is required.
    - Extract acceptance criteria from summary, description, and attachments; if Jira fields are sparse, inspect attachments before asking the user.
    - Use comments or linked issues only when acceptance criteria are ambiguous or explicitly reference them.
    - Identify affected service/module, expected behavior, scope boundaries, and likely test impact.
 
 2. Grill-Me Gate
    - Always run this as a visible checkpoint after Jira Intake and before Technical Plan.
-   - If previous Grill-Me decisions exist for the Jira or current session, list them first and mark them as reused decisions.
-   - Check whether any new implementation-impacting ambiguity remains after Jira summary, description, attachments, comments, and repo patterns are reviewed.
-   - Treat any implementation choice that changes behavior, permissions, API contract, persistence rules, rollout, ownership, or QA expectations as an implementation-impacting decision unless the Jira or existing repo pattern already fixes it unambiguously.
+   - Never leave the Grill-Me Gate silently. Always show the Grill-Me checkpoint to the user in chat and require an explicit user response before moving to the Technical Plan.
+   - Treat previous Grill-Me decisions as existing only when they are present in the currently active `Codex Development Log` Jira comment or were explicitly made in the current chat session.
+   - Do not reuse Grill-Me decisions from Jira changelog entries, deleted comments, historical comment bodies, or MCP changelog-only text. Those sources may prove history existed, but they are not active decisions.
+   - If previous Grill-Me decisions exist in the active log or current chat session, list them first and ask the user whether to reuse them before marking them as reused decisions.
+   - Check whether any new implementation-impacting ambiguity remains after Jira summary, description, attachments, and comments are reviewed.
+   - Review repo patterns during Grill-Me only when creating a new technical plan, when the Jira or active Development Log explicitly references code-level uncertainty, or when the user asks for repo/code validation.
+   - Treat any implementation choice that changes behavior, permissions, API contract, persistence rules, rollout, ownership, QA expectations, or user-visible navigation/linking as an implementation-impacting decision unless the Jira or existing repo pattern already fixes it unambiguously.
+   - Even when Jira evidence or repo patterns fix a user-visible value unambiguously, explicitly show the concrete value in the Grill-Me Decision Ledger. This includes client routes/URLs, menu labels, API paths, permission keys, feature names, and external handoff names. Do not hide these under a generic "repo pattern applies" statement.
    - If ambiguity remains, ask one critical question at a time and include a recommended answer for each question.
    - A recommended answer is only a recommendation; never record it as `Final Decision`, Jira log decision, or plan assumption until the user explicitly approves it or the decision is proven by existing repo/Jira evidence.
    - Do not collapse an unresolved recommended answer into `No new implementation-impacting ambiguity found`.
@@ -27,8 +36,10 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
    - Before leaving the Grill-Me Gate, run a visible Decision Ledger:
      - `Confirmed decisions`: user-approved or directly proven decisions.
      - `Recommended but unconfirmed`: recommendations still waiting for user approval.
-     - `No-question rationale`: why any apparent decision did not require a question.
-   - Proceed to Technical Plan only when `Recommended but unconfirmed` is empty, or when the user explicitly says to proceed with those recommendations.
+     - `No-question rationale`: why any apparent decision did not require a question, with the exact proven value listed when the decision affects user-visible navigation/linking, API contract, permissions, persistence rules, QA expectations, or rollout.
+   - If `Recommended but unconfirmed` contains more than one item, do not ask for a single bulk approval. Ask the first pending recommendation as one concrete question, wait for the user's answer, record that answer as that item's `Final Decision`, then ask the next pending recommendation.
+   - Do not proceed to Technical Plan while any `Recommended but unconfirmed` item is unanswered. Phrases like `proceed with the recommendations` count only after the user has explicitly answered each pending recommendation one by one.
+   - Proceed to Technical Plan only after the user explicitly confirms the Grill-Me checkpoint and `Recommended but unconfirmed` is empty.
    - Never ask questions that can be answered by reading the repo, configs, tests, Jenkinsfile, or existing patterns.
    - Stop grilling when the user says to wrap up, proceed, or when all implementation-impacting ambiguity is closed.
 
@@ -44,6 +55,10 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
 4. Jira Single Comment Log
    - Create or update one Jira comment titled `Codex Development Log`.
    - Read existing comments with `jira_get_issue(comment_limit=...)` and find the `codex-development-log:v1` marker before creating a new comment.
+   - Only treat currently active Jira comments as existing Development Logs. Ignore deleted, historical, or changelog-only comment bodies, even if they contain `codex-development-log:v1`.
+   - Only the active Development Log can be used as the Jira source for previous Grill-Me decisions. Changelog-only Development Log bodies must not be copied into the active log as confirmed/reused decisions unless the user explicitly reconfirms them in chat.
+   - If multiple active Development Log comments exist, update the newest active one and ignore older duplicates unless the user explicitly asks to clean them up.
+   - When the user asks to work on the active Development Log, read and update the active log first; do not announce or start a repo/code-structure compatibility check unless the user explicitly requests it or the active log requires code validation.
    - Do not create progress-comment spam.
    - Format the comment with Jira wiki markup: `h2.`, `h3.`, Jira tables, numbered lists, and compact bullets.
    - Include the internal execution slices and the physical Jira sub-task decision in the comment.
@@ -86,10 +101,13 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
 - Prefer native exposed Jira MCP tools when the session provides them.
 - If native MCP tools are not exposed, read repo-local `.codex/mcp.toml` and Codex-owned MCP configuration only; do not read Cursor MCP configuration or other IDE-specific configs.
 - When a direct MCP/REST fallback is needed, use Codex-owned secret sources such as the configured `token_env` or `~/.codex/config.toml` without printing tokens.
+- For repo-local Jira PDF attachment intake, use environment variables (`JIRA_PERSONAL_TOKEN`, `JIRA_BASE_URL`) instead of repo-stored tokens.
 - Skip repeated `tools/list` discovery unless a known tool call fails or the MCP server changes.
 - Use `jira_get_issue` first with fields for summary, description, attachment metadata, status, issue type, priority, assignee, reporter, labels, components, and fix versions; set `comment_limit` when comments are needed.
-- Use `jira_get_issue(comment_limit=...)` to read Jira comments and locate the existing `codex-development-log:v1` comment marker.
-- Use `jira_download_attachments` only after issue metadata confirms attachments exist.
+- Use `jira_get_issue(comment_limit=...)` to read active Jira comments and locate the existing `codex-development-log:v1` comment marker.
+- Do not infer the active Development Log from changelog entries, deleted comment snapshots, or comment history text. Changelog data can prove that a log existed before, but it must not be updated or counted as the current source of truth.
+- For active Development Log maintenance, prefer the active Jira comment as the source of truth and avoid repo inspection unless a new plan, explicit code validation request, or implementation step requires it.
+- Use `jira_download_attachments` only after issue metadata confirms attachments exist and direct URL/local-file attachment intake is unavailable; avoid it for PDFs when it would emit embedded/base64 content into the transcript.
 - Jira MCP currently exposes comment reading through `jira_get_issue`, not dedicated comment write/update tools; use Jira REST fallback for creating/updating the single development log comment when needed.
 - Never log MCP headers, personal tokens, or raw secret config values.
 
