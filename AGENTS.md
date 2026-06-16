@@ -1,5 +1,11 @@
 # Codex Workspace Instructions
 
+## Mandatory First Step For Jira Work
+
+- Before any Jira-based workflow or Jira MCP read, first check that both `JIRA_BASE_URL` and `JIRA_PERSONAL_TOKEN` are present in the environment without printing their values.
+- If either variable is missing, stop immediately and ask the user to define the missing variable(s).
+- Do not read Jira data, Jira attachments, Jira comments, repo implementation context, or start planning for that Jira until the user confirms both variables are available.
+
 This workspace uses the Codex agentic development workflow documented in `.codex/workflows/agentic-development-workflow.md`.
 
 ## Default Operating Model

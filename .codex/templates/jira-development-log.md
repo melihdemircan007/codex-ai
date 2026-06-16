@@ -1,59 +1,7 @@
-## Codex Development Log
+# Codex Development Log Template
 
-<!-- codex-development-log:v1 -->
+Jira comments must use the Jira wiki markup template:
 
-### Jira Analysis
-- Summary:
-- Description findings:
-- Attachment findings:
-- AC summary:
-- Scope:
-- Out of scope:
-- Open questions:
+`.codex/templates/jira-development-log.jira`
 
-### Grill-Me Gate
-- Previous decisions:
-- Reused decisions:
-- New ambiguity check: No new implementation-impacting ambiguity found / Questions required
-- Questions / decisions:
-
-### Technical Plan
-- Affected service/module:
-- Jira sub-task decision: No physical Jira sub-tasks required / Physical Jira sub-tasks recommended because ...
-- Execution slices:
-- Test strategy:
-
-### Work Done
-- [ ] Jira summary, description, and attachments analyzed
-- [ ] Grill-Me completed
-- [ ] Technical plan completed
-- [ ] Jira sub-task decision recorded
-- [ ] User approved implementation
-- [ ] Code changes completed
-- [ ] Unit/integration tests added or updated
-- [ ] Local targeted tests passed
-- [ ] Module build passed
-- [ ] Self-review completed
-- [ ] PR opened
-- [ ] Jenkins passed
-- [ ] Sent to QA
-
-### Test Results
-- Command:
-- Result:
-- Notes:
-
-### Self Review Notes
-- Findings:
-- Fixes applied:
-- Remaining risks:
-
-### PR / Jenkins
-- PR:
-- Jenkins build:
-- Status:
-
-### QA Handoff
-- Test scenarios:
-- Test data:
-- Risky areas:
+Do not use this Markdown file as the source for Jira Development Log comments. It exists only as a pointer so agents and maintainers do not accidentally create a second, divergent template.

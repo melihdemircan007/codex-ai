@@ -20,9 +20,22 @@ h3. Grill-Me Gate
 | Reused decisions |  |
 | New ambiguity check | No new implementation-impacting ambiguity found / Questions required |
 
-h4. Grill-Me Questions / Decisions
-|| # || Soru / Karar || Recommended Answer || Final Decision ||
-| 1 |  |  |  |
+h4. Grill-Me Discovered Decisions
+|| # || Decision Topic || Source / Evidence || Codex Found Decision || User Approval / Edit Evidence || Final Decision || Status ||
+| 1 |  |  |  |  | Pending user confirmation | pending |
+
+h4. Grill-Me Open Questions / User Decisions
+|| # || Question || Codex Recommended Answer || User Answer / Evidence || Final Decision || Status ||
+| 1 |  |  |  | Pending user confirmation | pending |
+
+h4. Final Grill-Me Decisions
+* 
+
+h4. Decision Ledger
+|| Alan || Değer ||
+| Confirmed decisions |  |
+| Recommended but unconfirmed |  |
+| No-question rationale |  |
 
 h3. Technical Plan
 || Alan || Değer ||
@@ -36,19 +49,18 @@ h4. Execution Slices
 
 h3. Work Done
 || Durum || İş ||
-| ( )| Jira summary, description, and attachments analyzed |
-| ( )| Grill-Me completed |
-| ( )| Technical plan completed |
-| ( )| Jira sub-task decision recorded |
-| ( )| User approved implementation |
-| ( )| Code changes completed |
-| ( )| Unit/integration tests added or updated |
-| ( )| Local targeted tests passed |
-| ( )| Module build passed |
-| ( )| Self-review completed |
-| ( )| PR opened |
-| ( )| Jenkins passed |
-| ( )| Sent to QA |
+| pending | Jira summary, description, and attachments analyzed |
+| pending | Grill-Me completed |
+| pending | Technical plan completed (incl. Jira sub-task decision) |
+| pending | User approved implementation |
+| pending | Code changes completed |
+| pending | Unit/integration tests added or updated |
+| pending | Local targeted tests passed |
+| pending | Module build passed |
+| pending | Self-review completed |
+| pending | PR opened |
+| pending | Jenkins passed |
+| pending | Sent to QA |
 
 h3. Test Results
 || Alan || Değer ||
