@@ -22,11 +22,15 @@ Create or update a single Jira comment titled Codex Development Log. Read active
 
 ## Approval Gate
 
-After Jira intake, Grill-Me decisions, technical plan, and Jira Development Log are complete, stop and wait for explicit user approval before implementation. Do not start code changes from the planning/comment stage unless the user explicitly approves implementation.
+After Jira intake, Grill-Me decisions, technical plan, Jira Development Log, and local branch preparation are complete, stop and wait for explicit user approval before implementation. Do not start code changes from the planning/comment stage unless the user explicitly approves implementation. Implementation approval is not approval to commit, push, open PRs, rerun Jenkins, merge, or hand off to QA.
+
+## Branch Preparation Gate
+
+Before implementation approval, prepare local branches in every repo where code will be written. Derive `BRANCH_NAME` from Jira key plus sanitized Jira summary. Fetch remote refs, verify `origin/releasable` and `origin/integration`, then create `feature/${BRANCH_NAME}-releasable` from `origin/releasable` and `feature/${BRANCH_NAME}-integration` from `origin/integration`. Do not commit, push, open PRs, rerun Jenkins, merge, or hand off to QA during branch preparation. Record branch names and base refs in the Jira Development Log.
 
 ## Implementation
 
-Implement only after explicit user approval. Implement the approved execution slice in the affected module. Read existing patterns first, make the smallest safe change, add or update tests, and avoid unrelated refactors. If a blocker or implementation-impacting ambiguity appears, stop implementation and return to Grill-Me with one concrete question and a recommended answer.
+Implement only after explicit user approval and after the releasable/integration local branches are prepared. Implement the approved execution slice in the affected module. Read existing patterns first, make the smallest safe change, add or update tests, and avoid unrelated refactors. If a blocker or implementation-impacting ambiguity appears, stop implementation and return to Grill-Me with one concrete question and a recommended answer. Do not commit or push without explicit user approval.
 
 ## Self Review
 

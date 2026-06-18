@@ -13,43 +13,69 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
    - Use known Atlassian MCP tools directly when available; do not spend time rediscovering them on every Jira.
    - Known Jira MCP read tools: `jira_get_issue` for summary, description, comments via `comment_limit`, status, and attachment metadata. Use `jira_download_attachments` only as a fallback for attachment content when direct URL download or local files are unavailable.
    - Treat attachments as first-class requirements sources, especially PDFs, images, spreadsheets, and analysis documents.
-   - When Jira attachment metadata includes a PDF (`application/pdf` or `.pdf` filename), create a local PDF copy and extract readable text with available deterministic tools before Grill-Me Gate.
+   - When Jira attachment metadata includes a PDF (`application/pdf` or `.pdf` filename), create a local PDF copy and extract readable text before Grill-Me Gate using the standard repo helper: `python3 .codex/scripts/extract_jira_pdf_text.py`.
+   - PDF extraction order:
+     1. Prefer direct attachment URL/local-file intake using Jira metadata.
+     2. Run `python3 .codex/scripts/extract_jira_pdf_text.py <pdf> -o <text-output>`.
+     3. The helper uses `pdftotext` when installed and falls back to deterministic Python extraction for compressed/object-stream/ToUnicode PDFs.
+     4. Use `jira_download_attachments` only when direct/local intake is unavailable or the helper cannot access the PDF file.
+     5. If no readable text is produced, explicitly record `OCR/manual inspection required` in the Jira Development Log and do not treat the PDF as fully analyzed.
    - Prefer direct attachment URL/local-file intake using Jira metadata when available. This avoids emitting large MCP embedded/base64 PDF blobs into the chat/tool transcript.
    - Use Jira credentials only from environment variables (`JIRA_PERSONAL_TOKEN`, `JIRA_BASE_URL`) or Codex-owned MCP config explicitly used for attachment retrieval; never print token values or raw config headers.
    - If direct download is unavailable and `jira_download_attachments` returns an embedded/base64 resource instead of a local file, do not treat the PDF as analyzed until a deterministic extractor has produced readable text. If the extractor reports no readable text, explicitly record that OCR/manual inspection is required.
    - Extract acceptance criteria from summary, description, and attachments; if Jira fields are sparse, inspect attachments before asking the user.
    - Use comments or linked issues only when acceptance criteria are ambiguous or explicitly reference them.
    - Identify affected service/module, expected behavior, scope boundaries, and likely test impact.
+   - Produce a short Requirement Digest before Grill-Me:
+     - attachment filenames and extraction status/method;
+     - acceptance criteria summary;
+     - evidence-backed implementation decisions;
+     - unresolved ambiguities or repo/PDF mismatches.
 
 2. Grill-Me Gate
    - Always run this as a visible checkpoint after Jira Intake and before Technical Plan.
-   - Never leave the Grill-Me Gate silently. Always show the Grill-Me checkpoint to the user in chat and require an explicit user response before moving to the Technical Plan.
+   - Never leave the Grill-Me Gate silently. Always show the Grill-Me checkpoint to the user in chat before moving to the Technical Plan.
    - Treat previous Grill-Me decisions as existing only when they are present in the currently active `Codex Development Log` Jira comment or were explicitly made in the current chat session.
    - Do not reuse Grill-Me decisions from Jira changelog entries, deleted comments, historical comment bodies, or MCP changelog-only text. Those sources may prove history existed, but they are not active decisions.
    - Do not inspect old/historical Development Log bodies in Jira changelog entries to check whether a decision was "definitely written somewhere". If a decision is absent from the active Development Log and current chat, treat it as unconfirmed and ask at the Grill-Me Gate.
    - Never claim a decision is in Jira or confirmed because it appears in all/most historical Development Log snapshots. Historical consistency is not confirmation; only the active Development Log, current chat, Jira summary/description/attachments, or repo evidence can confirm a decision.
    - If previous Grill-Me decisions exist in the active log or current chat session, list them first and ask the user whether to reuse them before marking them as reused decisions.
    - Check whether any new implementation-impacting ambiguity remains after Jira summary, description, attachments, and comments are reviewed.
-   - Review repo patterns during Grill-Me only when creating a new technical plan, when the Jira or active Development Log explicitly references code-level uncertainty, or when the user asks for repo/code validation.
+   - Review repo patterns during Grill-Me when a decision affects endpoint paths, routes, menu placement, permissions, persistence/update rules, Excel import/export contracts, or other code-level conventions.
+   - For endpoint, route, menu, permission, or Spring controller mapping decisions in this repository, first read and follow `.codex/skills/ecommerce-endpoint-discovery/SKILL.md`.
+   - Use the following canonical-source routing for discovered decisions:
+     - Frontend endpoint strings: `ecom-admin-client/src/app/shared/service/constants.ts`.
+     - Frontend routes: the relevant feature `*.routing.ts`, usually under `ecom-admin-client/src/app/**`.
+     - Sidebar/menu/permission placement: `ecom-admin-client/src/app/sidebar/sidebar.component.ts`.
+     - Admin external endpoints: relevant controllers under `ecom-admin-backend/src/main/java/com/turkcell/ecommerce/admin/controller/**`.
+     - Admin proxy/accessor paths: relevant services/accessors under `ecom-admin-backend/src/main/java/com/turkcell/ecommerce/admin/**`.
+     - Product catalog internal endpoints and persistence behavior: relevant controller/service/repository/entity/dto/resource files under `product-catalog-service/src/main/java/com/turkcell/ecommerce/catalog/**`.
+     - Excel import/export behavior: existing upload/export components, controllers, processors, and services in the closest matching domain.
    - Treat any implementation choice that changes behavior, permissions, API contract, persistence rules, rollout, ownership, QA expectations, or user-visible navigation/linking as an implementation-impacting decision unless the Jira or existing repo pattern already fixes it unambiguously.
    - Even when Jira evidence or repo patterns fix a user-visible value unambiguously, explicitly show the concrete value in the Grill-Me Decision Ledger. This includes client routes/URLs, menu labels, API paths, permission keys, feature names, and external handoff names. Do not hide these under a generic "repo pattern applies" statement.
-   - First list `Discovered Decisions`: decisions Codex found from Jira summary/description, attachments, active Jira comments, repo code, configs, tests, or established patterns. Number them sequentially and show the source/evidence for each decision.
-   - After listing Discovered Decisions, wait for the user to approve or edit them before asking new open questions. The user may reference decisions by number, including compact inputs such as `1`, `4`, or `2 and 5`; update only those numbered decisions and keep their approval/edit evidence.
-   - Do not proceed from Discovered Decisions to open Grill-Me questions while any discovered decision is still unapproved or being edited.
+   - First list `All Decisions Ledger`: every implementation-impacting decision Codex found from Jira summary/description, attachments, active Jira comments, repo code, configs, tests, or established patterns. Number them sequentially and show the source/evidence for each decision.
+   - Classify each ledger row with one of these statuses:
+     - `confirmed by evidence`: the Jira/PDF/repo evidence directly proves the decision and no user answer is required.
+     - `user-confirmed`: the user explicitly approved the decision in the current chat or active Development Log.
+     - `user-edited confirmed`: the user changed the decision in the current chat or active Development Log.
+     - `open question`: the decision is ambiguous, conflicts with repo evidence, or requires product/implementation intent.
+   - Show all decisions to the user, including evidence-backed confirmed decisions, so the user can see the full implementation contract.
+   - Do not require user approval for `confirmed by evidence` decisions. If the user edits one, change it to `user-edited confirmed` and record the evidence.
+   - Ask the user only for `open question` decisions. The user may reference decisions by number, including compact inputs such as `1`, `4`, or `2 and 5`; update only those numbered decisions and keep their approval/edit evidence.
    - If ambiguity remains, ask one critical question at a time and include a recommended answer for each question.
    - A recommended answer is only a recommendation; never record it as `Final Decision`, Jira log decision, or plan assumption until the user explicitly approves it or the decision is proven by existing repo/Jira evidence.
    - For every Grill-Me question or proposed decision, keep an auditable record with these separate fields: the exact question/decision topic, Codex recommended answer, user approval evidence from the current chat or active log, final decision, and status.
    - When a user approves or changes a recommendation, record the user approval evidence in concise natural language such as `User approved in chat: "..."` or `User changed decision in chat: "..."`. Do not hide approval evidence inside a generic confirmed-decisions paragraph.
-   - After all Discovered Decisions are approved or edited, list `Open Decision Questions`: implementation-impacting decisions that could not be derived from Jira/repo evidence. Ask these one at a time and record the answer in a separate open-question table.
+   - List `Open Decision Questions`: implementation-impacting decisions that could not be derived from Jira/repo evidence or that conflict with repo evidence. Ask these one at a time and record the answer in a separate open-question table.
    - Do not collapse an unresolved recommended answer into `No new implementation-impacting ambiguity found`.
    - If no new ambiguity remains, explicitly record: `No new implementation-impacting ambiguity found`.
    - Before leaving the Grill-Me Gate, run a visible Decision Ledger:
-     - `Confirmed decisions`: user-approved or directly proven decisions.
-     - `Recommended but unconfirmed`: recommendations still waiting for user approval.
+     - `Confirmed decisions`: evidence-backed, user-approved, or user-edited decisions.
+     - `Open questions`: recommendations still waiting for user answer.
      - `No-question rationale`: why any apparent decision did not require a question, with the exact proven value listed when the decision affects user-visible navigation/linking, API contract, permissions, persistence rules, QA expectations, or rollout.
-   - If `Recommended but unconfirmed` contains more than one item, do not ask for a single bulk approval. Ask the first pending recommendation as one concrete question, wait for the user's answer, record that answer as that item's `Final Decision`, then ask the next pending recommendation.
-   - Do not proceed to Technical Plan while any `Recommended but unconfirmed` item is unanswered. Phrases like `proceed with the recommendations` count only after the user has explicitly answered each pending recommendation one by one.
-   - Proceed to Technical Plan only after the user explicitly confirms the Grill-Me checkpoint and `Recommended but unconfirmed` is empty.
+   - If `Open questions` contains more than one item, do not ask for a single bulk approval. Ask the first pending recommendation as one concrete question, wait for the user's answer, record that answer as that item's `Final Decision`, then ask the next pending recommendation.
+   - Do not proceed to Technical Plan while any `open question` item is unanswered. Phrases like `proceed with the recommendations` count only after the user has explicitly answered each pending recommendation one by one.
+   - Proceed to Technical Plan after the Grill-Me checkpoint is shown and no `open question` items remain.
    - Never ask questions that can be answered by reading the repo, configs, tests, Jenkinsfile, or existing patterns.
    - Stop grilling when the user says to wrap up, proceed, or when all implementation-impacting ambiguity is closed.
 
@@ -74,39 +100,63 @@ Standardize how Codex supports Jira-based development from acceptance criteria a
   - Format the comment with Jira wiki markup: `h2.`, `h3.`, Jira tables, numbered lists, and compact bullets.
   - For status rows in the Work Done table, use explicit text states such as `{color:green}done{color}` and `pending` instead of literal `x`/checkbox markers; Jira may render `x` as a red cross.
   - Include the internal execution slices and the physical Jira sub-task decision in the comment.
-  - In the Grill-Me section, use a `Grill-Me Discovered Decisions` table for decisions Codex found from Jira/PDF/repo evidence, with separate columns for `Decision Topic`, `Source / Evidence`, `Codex Found Decision`, `User Approval / Edit Evidence`, `Final Decision`, and `Status`.
+  - Include PDF extraction status and method in the Jira Analysis section.
+  - In the Grill-Me section, use a `Grill-Me All Decisions Ledger` table for every decision Codex found from Jira/PDF/repo evidence, with separate columns for `Decision Topic`, `Source / Evidence`, `Codex Found Decision`, `User Approval / Edit Evidence`, `Final Decision`, and `Status`.
   - In the Grill-Me section, use a separate `Grill-Me Open Questions / User Decisions` table for decisions that required a user answer, with separate columns for `Question`, `Codex Recommended Answer`, `User Answer / Evidence`, `Final Decision`, and `Status`.
-  - In both Grill-Me tables, keep `User Approval / Edit Evidence` or `User Answer / Evidence` empty and `Final Decision` as `Pending user confirmation` for any decision the user has not explicitly approved or edited.
+  - For evidence-backed rows, set `Status` to `confirmed by evidence`, fill `Final Decision`, and leave `User Approval / Edit Evidence` empty unless the user edits it.
+  - For user-approved rows, set `Status` to `user-confirmed` or `user-edited confirmed` and record the exact chat/active-log evidence.
+  - For unresolved rows, keep `User Answer / Evidence` empty and `Final Decision` as `Pending user decision`.
   - Keep a short `Final Grill-Me Decisions` section after both tables so reviewers can scan all approved decisions without expanding long Jira table rows.
-   - Do not mark `Grill-Me completed` in the Work Done table while any Grill-Me decision is pending user confirmation.
+   - Do not mark `Grill-Me completed` in the Work Done table while any Grill-Me decision has `open question` status.
    - Update the same comment after planning, implementation, test execution, self-review, PR creation, Jenkins result, and QA handoff.
    - If Jira MCP comment write/update tools are not exposed, use Jira REST fallback: `POST /rest/api/2/issue/{issueKey}/comment` to create and `PUT /rest/api/2/issue/{issueKey}/comment/{commentId}` to update.
    - Use the Jira wiki template in `.codex/templates/jira-development-log.jira`.
 
-5. Approval Gate
-   - After Jira intake, Grill-Me decisions, technical plan, and Jira Development Log are complete, stop and wait for explicit user approval before implementation.
-   - Do not start code changes from the planning/comment stage unless the user explicitly approves implementation.
+5. Branch Preparation Gate
+   - After Jira intake, Grill-Me decisions, technical plan, and Jira Development Log are complete, prepare local implementation branches before asking for code implementation approval.
+   - For each repository where code will be written, derive `BRANCH_NAME` from the Jira key and summary:
+     - Format: `${JIRA_KEY}-${sanitized_jira_summary}`.
+     - Convert the summary to lowercase, transliterate Turkish characters to ASCII, replace spaces and special characters with `-`, collapse repeated `-`, and trim leading/trailing `-`.
+     - Example: `DCECSS-3320 Amazon satış fiyatının toplu güncellenmesi` becomes `DCECSS-3320-amazon-satis-fiyatinin-toplu-guncellenmesi`.
+   - Run `git fetch` for the repository and use remote base refs, not potentially stale local branches.
+   - Verify both required base refs exist before branch creation:
+     - `origin/releasable`
+     - `origin/integration`
+   - Create the local branches:
+     - `feature/${BRANCH_NAME}-releasable` from `origin/releasable`.
+     - `feature/${BRANCH_NAME}-integration` from `origin/integration`.
+   - If either local branch already exists, inspect it and reuse it only when it points to the intended Jira work; otherwise stop and ask the user how to proceed.
+   - Do not delete, reset, or overwrite existing branches or user changes without explicit user approval.
+   - Do not commit, push, open PRs, rerun Jenkins, merge, or hand off to QA during branch preparation.
+   - Record the prepared branch names and base refs in the Jira Development Log.
 
-6. Implementation
+6. Approval Gate
+   - After Jira intake, Grill-Me decisions, technical plan, and Jira Development Log are complete, stop and wait for explicit user approval before implementation.
+   - The local `feature/${BRANCH_NAME}-releasable` and `feature/${BRANCH_NAME}-integration` branches must be prepared for each code-writing repository before implementation starts.
+   - Do not start code changes from the planning/comment stage unless the user explicitly approves implementation.
+   - User approval to implement is not approval to commit, push, open a PR, rerun Jenkins, merge, or hand off to QA.
+
+7. Implementation
    - Follow existing code style and module patterns.
    - Avoid unrelated refactors.
    - Write or update tests with the code change.
    - Implement the approved execution slices; keep each slice focused on one deliverable or behavior.
    - Continue autonomously through code, tests, and self-review once implementation is approved.
    - If a blocker or implementation-impacting ambiguity appears, return to the Grill-Me Gate and ask the user one concrete question with a recommended answer.
-   - Keep external-system actions under user approval: PR open, Jenkins rerun, merge, and QA handoff.
+   - Keep commit, push, and external-system actions under user approval: PR open, Jenkins rerun, merge, and QA handoff.
 
-7. Self Review
+8. Self Review
    - Review the diff as a production reviewer.
    - Prioritize bugs, regressions, missing tests, behavioral drift from acceptance criteria, and unnecessary changes.
    - Fix valid findings before PR handoff.
 
-8. PR Handoff
+9. PR Handoff
    - Prepare a Bitbucket PR summary with Jira key, behavior summary, test evidence, risks, and QA notes.
    - Link the PR in the Jira Development Log.
    - Use the checklist in `.codex/checklists/pr-readiness.md`.
+   - Ask for explicit user approval before pushing prepared branches or opening PRs.
 
-9. Jenkins and QA
+10. Jenkins and QA
    - Check Jenkins after PR approval or when the user asks.
    - Classify failures as compile, test, dependency, Sonar, Fortify, packaging, or deploy.
    - If Jenkins passes, prepare QA handoff notes from acceptance criteria and risk areas.

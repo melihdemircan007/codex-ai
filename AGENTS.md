@@ -8,11 +8,18 @@
 
 This workspace uses the Codex agentic development workflow documented in `.codex/workflows/agentic-development-workflow.md`.
 
+## Repo-Local Skills
+
+- For endpoint discovery, endpoint naming, frontend Constants URLs, Angular routes, sidebar/menu, permission, or Spring controller mapping work in this repository, first read and follow `.codex/skills/ecommerce-endpoint-discovery/SKILL.md`.
+- During that work, avoid broad repo-wide `rg` searches; use the skill's narrow canonical-source workflow to keep token usage low.
+
 ## Default Operating Model
 
 - Work from Jira summary, description, and attachments first; read these automatically during Jira intake without asking for approval.
 - For Jira intake via Atlassian MCP, do not repeat tool discovery when the known tools are available: `jira_get_issue`, `jira_download_attachments`; Jira comments are read through `jira_get_issue(comment_limit=...)`, and comment create/update uses Jira REST fallback when MCP write tools are not exposed.
 - Use controlled autonomy: analyze, grill, plan, and update the Jira Development Log; wait for user approval before starting implementation.
+- Before implementation approval, prepare local branches in every repo where code will be written: `feature/${BRANCH_NAME}-releasable` from `origin/releasable` and `feature/${BRANCH_NAME}-integration` from `origin/integration`, where `BRANCH_NAME` is derived from Jira key plus sanitized Jira summary.
+- Branch preparation is local only: do not commit, push, open PRs, rerun Jenkins, merge, or hand off to QA without explicit user approval.
 - During implementation, continue autonomously unless blocked; if an implementation-impacting ambiguity appears, return to the Grill-Me Gate and ask the user.
 - Ask before opening PRs, rerunning Jenkins, merging, or handing off to QA.
 - Before implementation, run the Grill-Me Gate as a visible checkpoint in chat and wait for the user's explicit response before moving to the Technical Plan. List previous decisions only from the active `Codex Development Log` Jira comment or the current chat session; ignore changelog-only, deleted, or historical comment bodies as decision sources.

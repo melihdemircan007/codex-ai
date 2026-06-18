@@ -9,6 +9,7 @@ h3. Jira Analysis
 | Summary |  |
 | Description findings |  |
 | Attachment findings |  |
+| PDF extraction status | Not applicable / Extracted with .codex/scripts/extract_jira_pdf_text.py / OCR/manual inspection required |
 | AC summary |  |
 | Scope |  |
 | Out of scope |  |
@@ -20,13 +21,13 @@ h3. Grill-Me Gate
 | Reused decisions |  |
 | New ambiguity check | No new implementation-impacting ambiguity found / Questions required |
 
-h4. Grill-Me Discovered Decisions
+h4. Grill-Me All Decisions Ledger
 || # || Decision Topic || Source / Evidence || Codex Found Decision || User Approval / Edit Evidence || Final Decision || Status ||
-| 1 |  |  |  |  | Pending user confirmation | pending |
+| 1 |  |  |  |  |  | confirmed by evidence / user-confirmed / user-edited confirmed / open question |
 
 h4. Grill-Me Open Questions / User Decisions
 || # || Question || Codex Recommended Answer || User Answer / Evidence || Final Decision || Status ||
-| 1 |  |  |  | Pending user confirmation | pending |
+| 1 |  |  |  | Pending user decision | open question |
 
 h4. Final Grill-Me Decisions
 * 
@@ -34,13 +35,16 @@ h4. Final Grill-Me Decisions
 h4. Decision Ledger
 || Alan || Değer ||
 | Confirmed decisions |  |
-| Recommended but unconfirmed |  |
+| Open questions |  |
 | No-question rationale |  |
 
 h3. Technical Plan
 || Alan || Değer ||
 | Affected service/module |  |
 | Jira sub-task decision | No physical Jira sub-tasks required / Physical Jira sub-tasks recommended because ... |
+| Branch name |  |
+| Releasable branch | feature/<BRANCH_NAME>-releasable from origin/releasable |
+| Integration branch | feature/<BRANCH_NAME>-integration from origin/integration |
 | Test strategy |  |
 
 h4. Execution Slices
@@ -52,6 +56,7 @@ h3. Work Done
 | pending | Jira summary, description, and attachments analyzed |
 | pending | Grill-Me completed |
 | pending | Technical plan completed (incl. Jira sub-task decision) |
+| pending | Local releasable/integration branches prepared |
 | pending | User approved implementation |
 | pending | Code changes completed |
 | pending | Unit/integration tests added or updated |
