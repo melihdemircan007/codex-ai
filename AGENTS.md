@@ -1,37 +1,44 @@
-# Codex Workspace Instructions
+# Agent Instructions
 
-## Mandatory First Step For Jira Work
+This repository uses a **tool-agnostic, modular agentic development workflow**. It works the
+same in Codex, Claude Code, Cursor, or any other AI coding agent.
 
-- Before any Jira-based workflow or Jira MCP read, first check that both `JIRA_BASE_URL` and `JIRA_PERSONAL_TOKEN` are present in the environment without printing their values.
-- If either variable is missing, stop immediately and ask the user to define the missing variable(s).
-- Do not read Jira data, Jira attachments, Jira comments, repo implementation context, or start planning for that Jira until the user confirms both variables are available.
+## Start here
 
-This workspace uses the Codex agentic development workflow documented in `.codex/workflows/agentic-development-workflow.md`.
+**Read and follow [`.agents/workflow.md`](.agents/workflow.md).** It is the orchestrator: it tells
+you to select a *profile* for the job, load its settings, run the stages in order, and **stop for
+explicit user approval at every gate**.
 
-## Repo-Local Skills
+Before doing any work:
+1. Determine the job type and select a profile from `.agents/profiles/` (ask the user if ambiguous).
+2. Honor the profile's frontmatter knobs (`stages`, `tests`, `review_passes`, `adapters`, `approval_gates`).
+3. Never proceed across an approval gate without an explicit "go".
 
-- For endpoint discovery, endpoint naming, frontend Constants URLs, Angular routes, sidebar/menu, permission, or Spring controller mapping work in this repository, first read and follow `.codex/skills/ecommerce-endpoint-discovery/SKILL.md`.
-- During that work, avoid broad repo-wide `rg` searches; use the skill's narrow canonical-source workflow to keep token usage low.
+## Layout
 
-## Default Operating Model
+| Path | What it holds |
+|---|---|
+| `.agents/workflow.md` | The orchestrator loop (start here). |
+| `.agents/profiles/` | Job profiles that compose stages + knobs (the things you tune per job). |
+| `.agents/stages/` | Reusable workflow steps (intake, clarify, plan, implement, test, review, handoff…). |
+| `.agents/roles/` | Personas a stage adopts (frontend-analyst, backend-analyst, implementer, tester, reviewer). |
+| `.agents/adapters/` | Optional integrations (jira, bitbucket, jenkins) — enabled per profile. |
+| `.agents/rules/` | Repo coding conventions (java-backend, angular-frontend, testing-standards). |
+| `.agents/skills/` | Token-efficient how-tos (endpoint-discovery, generate-tests, multi-repo-feature, code-review). |
+| `.agents/scripts/` | Helper scripts (PDF text extraction for issue attachments). |
 
-- Work from Jira summary, description, and attachments first; read these automatically during Jira intake without asking for approval.
-- For Jira intake via Atlassian MCP, do not repeat tool discovery when the known tools are available: `jira_get_issue`, `jira_download_attachments`; Jira comments are read through `jira_get_issue(comment_limit=...)`, and comment create/update uses Jira REST fallback when MCP write tools are not exposed.
-- Use controlled autonomy: analyze, grill, plan, and update the Jira Development Log; wait for user approval before starting implementation.
-- Before implementation approval, prepare local branches in every repo where code will be written: `feature/${BRANCH_NAME}-releasable` from `origin/releasable` and `feature/${BRANCH_NAME}-integration` from `origin/integration`, where `BRANCH_NAME` is derived from Jira key plus sanitized Jira summary.
-- Branch preparation is local only: do not commit, push, open PRs, rerun Jenkins, merge, or hand off to QA without explicit user approval.
-- During implementation, continue autonomously unless blocked; if an implementation-impacting ambiguity appears, return to the Grill-Me Gate and ask the user.
-- Ask before opening PRs, rerunning Jenkins, merging, or handing off to QA.
-- Before implementation, run the Grill-Me Gate as a visible checkpoint in chat and wait for the user's explicit response before moving to the Technical Plan. List previous decisions only from the active `Codex Development Log` Jira comment or the current chat session; ignore changelog-only, deleted, or historical comment bodies as decision sources.
-- Keep one Jira comment updated as the source of truth for plan, progress, tests, review notes, PR/Jenkins status, and QA handoff.
-- Default to internal execution slices instead of physical Jira sub-tasks.
-- Recommend physical Jira sub-tasks only when multiple people/teams, multiple PRs, independent deliverables, separate QA/DevOps tracking, or risky rollout tracking is needed.
-- Do not store Jira, Bitbucket, Jenkins, or other tokens in repo files or chat-visible logs.
+## Repo facts
 
-## Verification Defaults
+- Monorepo of ~45 modules: Java 17/Maven + Java 21/Gradle Spring Boot services, BFFs, shared libs, Angular frontends.
+- Build/test: Maven → `mvn test` (`mvn clean verify` for integration); Gradle → `./gradlew test` then `./gradlew build`; frontend → `npm test`, `npm run lint`, `npm run build`.
+- Default is to build/test the **affected module only**, not the whole workspace.
 
-- Run targeted tests for changed behavior.
-- Run the affected module build before PR handoff.
-- For Maven modules, prefer `mvn test`; use `mvn clean verify` when integration/failsafe checks matter.
-- For Gradle modules, prefer `./gradlew test`, then `./gradlew build` before PR handoff.
-- For frontend modules, run available `npm test`, `npm run lint`, and `npm run build` scripts.
+## Security
+
+- Never write Jira/Bitbucket/Jenkins/registry tokens into repo files or chat.
+- Jira credentials come from the environment (`JIRA_BASE_URL` / `JIRA_PERSONAL_TOKEN`), never the repo.
+  Git/Bitbucket auth uses your **ambient git setup** (SSH key or OS credential helper) — the workflow
+  injects no token; an adapter preflight verifies it and stops to ask if it's missing.
+- Use environment variables or runtime MCP/secret config outside the repo. If a secret leaks, recommend rotation.
+
+> Claude Code users: `CLAUDE.md` imports this file via `@AGENTS.md`. Cursor and Codex read this file directly.

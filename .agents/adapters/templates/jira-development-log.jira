@@ -1,0 +1,113 @@
+h2. Agent Development Log
+
+{noformat}
+agent-development-log:v1
+{noformat}
+
+h3. Analysis
+|| Alan || Değer ||
+| Summary |  |
+| Description findings |  |
+| Attachment findings |  |
+| Attachment extraction status | Not applicable / PDF: extract_jira_pdf_text.py / DOCX: extract_jira_docx_text.py / manual inspection required |
+| AC summary |  |
+| Scope |  |
+| Out of scope |  |
+| Open questions |  |
+
+h3. Profile
+|| Alan || Değer ||
+| Profile | backend-feature / frontend-feature / fullstack-feature / library-bump / hotfix / custom |
+| areas | backend / frontend / backend, frontend |
+| tests |  |
+| review_passes |  |
+| reviewers |  |
+| clarify_depth | deep / light / none |
+| adapters |  |
+
+h3. Clarify Gate
+h4. All Decisions Ledger (Decision Checklist)
+Every row needs explicit user approval — evidence supplies the recommended answer, it does not close the decision. Use stable ids (D1, D2, ...); mark overridden rows superseded (never delete).
+|| ID || Decision Topic || Source / Evidence || Recommended Answer || User Approval / Edit Evidence || Final Decision || Status ||
+| D1 |  |  |  |  |  | recommended (awaiting approval) / user-confirmed / user-edited / superseded by Dx / open question |
+
+h4. Must-Not-Exist (negative requirements)
+|| ID || Must NOT exist / change || Source || Review verification (absent/unchanged) ||
+| N1 |  |  |  |
+
+h4. Open Questions / User Decisions
+|| # || Question || Recommended Answer || User Answer / Evidence || Final Decision || Status ||
+| 1 |  |  |  | Pending user decision | open question |
+
+h4. Final Decisions
+*
+
+h3. Developer Notes / Tech Review
+|| Alan || Değer ||
+| Proposed approach |  |
+| Alternatives considered |  |
+| Risks / reuse opportunities |  |
+| Developer comment |  |
+| Resolution (adjusted / re-analyzed / proceed) |  |
+
+h3. Technical Plan
+|| Alan || Değer ||
+| Affected service/module |  |
+| Releasable branch | feature/<BRANCH>-releasable |
+| Integration branch | feature/<BRANCH>-integration |
+| Test strategy |  |
+
+h4. Execution Slices
+|| # || Slice || Deliverable / Behavior || Status || Notes ||
+| 1 |  |  | Planned |  |
+
+h3. Work Done
+|| Durum || İş ||
+| pending | Requirement analyzed |
+| pending | Clarify completed |
+| pending | Technical plan completed |
+| pending | User approved implementation |
+| pending | Code changes completed |
+| pending | Tests added/updated (per tests knob) |
+| pending | Local targeted tests passed |
+| pending | Module build passed |
+| pending | Review completed (review_passes) |
+| pending | Requirement traceability verified (all decisions met, Must-Not absent) |
+| pending | Releasable code completed |
+| pending | Ported releasable -> integration (conflicts resolved) |
+| pending | Integration PR opened |
+| pending | Releasable PR opened |
+| pending | CI passed |
+| pending | Sent to QA |
+
+h3. Test Results
+|| Alan || Değer ||
+| Command |  |
+| Result |  |
+| Notes |  |
+
+h3. Review Notes
+|| Alan || Değer ||
+| Findings |  |
+| Fixes applied |  |
+| Remaining risks |  |
+
+h3. Delivery (dual-branch) / CI
+|| Alan || Değer ||
+| Releasable branch |  |
+| Integration branch |  |
+| Integration merge / conflict status | clean / conflicts resolved |
+| Integration PR (opened first) |  |
+| Releasable PR (opened second) |  |
+| Build |  |
+| Status |  |
+
+h3. QA Handoff
+h4. Test Scenarios
+#
+
+h4. Test Data
+*
+
+h4. Risky Areas
+*

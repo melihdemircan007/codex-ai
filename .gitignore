@@ -1,2 +1,5 @@
 .DS_Store
 **/.DS_Store
+
+# Agentic workflow job worktrees (.agents/skills/worktree-isolation.md) — kept locally, never tracked
+.worktrees/
