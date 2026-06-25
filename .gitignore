@@ -1,5 +1,8 @@
 .DS_Store
 **/.DS_Store
 
+# Local env secrets (Jenkins, Bitbucket, Jira tokens)
+.env.local
+
 # Agentic workflow job worktrees (.agents/skills/worktree-isolation.md) — kept locally, never tracked
 .worktrees/
