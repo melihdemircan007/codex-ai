@@ -72,3 +72,6 @@ git -C "$ROOT/M" worktree prune                # tidy stale entries (manual)
 - The worktrees live under `$ROOT/.worktrees/` — ensure `.worktrees/` is in the root `.gitignore`
   (so the root repo doesn't track them).
 - Don't nest a worktree inside the module's own tracked tree; keep them under `$ROOT/.worktrees/`.
+- **Build caches are shared, not duplicated:** worktrees all use the global `~/.m2` (Maven) and
+  `~/.gradle` (Gradle). Builds in a worktree resolve from and cache into the one shared local repo — no
+  per-worktree `.m2`, no re-download. Never override `maven.repo.local`.

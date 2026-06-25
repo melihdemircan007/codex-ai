@@ -11,6 +11,7 @@ clarify_depth: deep
 dev_review: true
 isolation: worktree
 delivery: dual-branch
+ci_fix_attempts: 2
 adapters: [jira, bitbucket]
 approval_gates: [after_clarify, after_tech_review, after_plan, before_pr]
 ---

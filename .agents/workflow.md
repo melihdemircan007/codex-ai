@@ -67,11 +67,13 @@ Read the selected profile's frontmatter. The keys you must honor:
 | `dev_review` | `true`/`false`. When `true`, the `tech-review` stage (between clarify and plan) presents the technical approach and solicits a **developer comment** that can reshape the approach or send it back to re-analyze. Default `false`. |
 | `isolation` | `worktree`/`in-place`. `worktree` = each affected repo gets its own **git worktree** (own working dir + branch) so jobs/runs never collide; worktrees are **kept** (manual cleanup). `in-place` = branch in the main working tree. See `.agents/skills/worktree-isolation.md`. |
 | `delivery` | `dual-branch`/`single-branch`. `dual-branch` = author in the `…-releasable` worktree, merge into the `…-integration` worktree (resolve conflicts), then open the **integration PR first**, then the **releasable PR** — each its own approval, all logged to the Jira dev log. `single-branch` = one branch, one PR. See `.agents/adapters/bitbucket.md`. |
+| `ci_fix_attempts` | Integer (default `2`). When `jenkins` is enabled, after the integration PR the workflow waits for its build; on failure it classifies + runs a fix→rebuild loop **at most this many times**, then HALTs. The releasable PR opens only on a green integration build. See `.agents/adapters/jenkins.md`. |
 | `adapters` | Integrations to activate (`jira`, `bitbucket`, `jenkins`). Empty = none; intake falls back to the prompt. |
 | `approval_gates` | Where to STOP for explicit user approval (e.g. `after_clarify`, `after_plan`, `before_pr`). The `after_triage` stop is always on, on top of these. |
 
 If a key is absent in the profile, use these defaults: `areas: [backend]`, `tests: [unit]`,
-`review_passes: 1`, `reviewers: [self]`, `clarify_depth: deep`, `adapters: []`,
+`review_passes: 1`, `reviewers: [self]`, `clarify_depth: deep`, `dev_review: false`,
+`isolation: worktree`, `delivery: dual-branch`, `ci_fix_attempts: 2`, `adapters: []`,
 `approval_gates: [after_plan]`.
 
 ## Step 3 — Run the stages
@@ -105,6 +107,11 @@ parametrized by the knobs:
   repo (`…-releasable` + `…-integration`): code is authored on releasable, merged into integration
   (conflicts resolved), then `handoff` opens the **integration PR first, then the releasable PR** — each
   a separate approval, every step logged to the Jira dev log (`.agents/adapters/bitbucket.md`).
+- **CI gate between the two PRs (when `jenkins` enabled).** After the integration PR, **wait for its
+  build** by polling **Jenkins `lastBuild`** (`JENKINS_URL/USER/PASSWORD` + `JENKINS_JOB_PREFIX`). SUCCESS
+  → open the releasable PR. FAILURE → **diagnose from Jenkins** (consoleText/testReport/wfapi), classify,
+  **resume the mapped stage**, and run the auto-fix loop capped at `ci_fix_attempts` (default 2), then
+  HALT. **The releasable PR never opens unless Jenkins `lastBuild` is SUCCESS.** (`.agents/adapters/jenkins.md`)
 - `test` writes **only** the kinds listed in `tests`; if `tests: []` it is a no-op (state this explicitly in the report).
 - `review` runs `review_passes` rounds, each applying the `reviewers` lenses.
 - Adapter-backed stages (`intake` via Jira, `handoff` via Bitbucket/Jenkins) only call an
@@ -145,6 +152,16 @@ approval for later gates (e.g. "implement" ≠ "open a PR"). Destructive or outw
 - **On git auth failure: HALT and WAIT.** Do not run any further stage. Offer the user the choice to fix
   ambient auth or **enter a git username/password now**; cache it in memory only (`.agents/adapters/bitbucket.md`)
   and resume **only after the preflight passes**. Never proceed past a failed auth check.
+- **The build gate + failure diagnosis use Jenkins directly.** With `jenkins` enabled, poll Jenkins
+  `lastBuild` and, on failure, read consoleText/testReport/wfapi via `JENKINS_URL` / `JENKINS_USER` /
+  `JENKINS_PASSWORD` (+ `JENKINS_JOB_PREFIX`) — kept in `.env.local`, separate from git/Bitbucket creds.
+  Missing any → **HALT and ask to export them**. On failure, classify and **resume the mapped stage**.
+- **Opening a PR is headless Bitbucket REST — force it, no browser.** (The build gate is read from
+  Jenkins, see the rule above.) **Never attempt,
+  wait on, or mention the in-app browser** for these. There are **no `BITBUCKET_*` env vars**: derive
+  `HOST`/`BASE`/`PROJECT`/`SLUG` from the git remote and authenticate with **git's own credential**
+  (`git credential fill` — the same creds git uses for push). On HTTP **401/403**, HALT and run the
+  git-credential setup (`git credential approve`), then retry — never prompt for `BITBUCKET_*` env vars.
 - **Requirement traceability.** Keep one Decision Checklist from `clarify`; mark overridden decisions
   `superseded` (never silently drop); keep a separate **Must-Not-Exist** list for negative requirements;
   verify every item against code in `review`; **don't mark the job done if a single item is unmet or

@@ -37,8 +37,14 @@ Before doing any work:
 
 - Never write Jira/Bitbucket/Jenkins/registry tokens into repo files or chat.
 - Jira credentials come from the environment (`JIRA_BASE_URL` / `JIRA_PERSONAL_TOKEN`), never the repo.
-  Git/Bitbucket auth uses your **ambient git setup** (SSH key or OS credential helper) — the workflow
-  injects no token; an adapter preflight verifies it and stops to ask if it's missing.
+  Git **transport** (clone/fetch/push) uses your **ambient git setup** (SSH key or OS credential helper) —
+  the workflow injects no token there. **Opening a PR and reading build-status are headless Bitbucket
+  REST** — **no `BITBUCKET_*` env vars**: base/project/slug are derived from the git remote and the REST
+  call **reuses git's own credential** (`git credential fill`, same as `git push`). Git transport and
+  Bitbucket REST thus share **one** credential source. (Jira keeps its own `JIRA_*` env token.)
+- **Jenkins** (build gate + failure diagnosis) uses its own env — `JENKINS_URL` / `JENKINS_USER` /
+  `JENKINS_PASSWORD` (+ `JENKINS_JOB_PREFIX`) — kept in `.env.local` (gitignored), never the repo. The
+  jenkins adapter preflights these and stops to ask if missing.
 - Use environment variables or runtime MCP/secret config outside the repo. If a secret leaks, recommend rotation.
 
 > Claude Code users: `CLAUDE.md` imports this file via `@AGENTS.md`. Cursor and Codex read this file directly.

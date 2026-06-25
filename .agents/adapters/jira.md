@@ -34,7 +34,11 @@ block. Use the template at `.agents/adapters/templates/jira-development-log.jira
   progress-comment spam.
 - For `delivery: dual-branch`, fill the **Delivery** block: releasable + integration branch names, the
   integration merge/conflict status, the **Integration PR** link, the **Releasable PR** link (in order),
-  and tick the matching Work Done rows. Log this as the steps happen.
+  and tick the matching Work Done rows. Log this as the steps happen. The PR links are the
+  `links.self[0].href` returned by the Bitbucket REST API (`.agents/adapters/bitbucket.md`). Also record
+  the **Jenkins `lastBuild` status** (`#N SUCCESS/FAILURE` + Jenkins URL + fix-attempt count) and, on
+  failure, the **failure class + resume stage + console link** (`.agents/adapters/jenkins.md`) between the
+  Integration and Releasable PR rows.
 - If MCP comment write tools aren't exposed, use REST fallback: `POST /rest/api/2/issue/{key}/comment`
   to create, `PUT /rest/api/2/issue/{key}/comment/{id}` to update. Format with Jira wiki markup
   (`h2.`/`h3.`, tables, lists). Use explicit `{color:green}done{color}`/`pending` states, not `x` marks.

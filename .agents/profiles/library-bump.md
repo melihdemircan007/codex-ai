@@ -11,6 +11,7 @@ clarify_depth: none
 dev_review: false
 isolation: worktree
 delivery: dual-branch
+ci_fix_attempts: 2
 adapters: [jira, bitbucket, jenkins]
 approval_gates: [after_plan, before_pr]
 ---

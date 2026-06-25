@@ -31,5 +31,9 @@ HTTP Request → Filter → Controller → (Business) Service → Caller / Cache
 ## Build & test
 
 - Maven: `mvn test` (`mvn clean verify` for integration). Gradle: `./gradlew test` then `./gradlew build`.
+- **Local repository:** Maven builds use the developer's **shared local repo `~/.m2`** (the default).
+  The workflow never passes `-Dmaven.repo.local` or `-s`, so every build — **including those inside git
+  worktrees** — resolves from and caches into the one shared `~/.m2/repository` (no per-worktree `.m2`,
+  no re-download). Don't hardcode an absolute `.m2` path; `~/.m2` is correct for every machine.
 - Build the **affected module** before handoff; full-workspace build is not the default.
 - Shared-lib changes: build the lib (publishes to mavenLocal) before its consumers.

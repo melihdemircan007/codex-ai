@@ -76,6 +76,7 @@ h3. Work Done
 | pending | Releasable code completed |
 | pending | Ported releasable -> integration (conflicts resolved) |
 | pending | Integration PR opened |
+| pending | Integration build green (fix attempts ≤ ci_fix_attempts) |
 | pending | Releasable PR opened |
 | pending | CI passed |
 | pending | Sent to QA |
@@ -98,7 +99,9 @@ h3. Delivery (dual-branch) / CI
 | Integration branch |  |
 | Integration merge / conflict status | clean / conflicts resolved |
 | Integration PR (opened first) |  |
-| Releasable PR (opened second) |  |
+| Integration build status | Jenkins lastBuild #N: SUCCESS / FAILURE (Jenkins URL) — fix attempts: 0/2 |
+| Build failure class / resume stage | (e.g. test → implement→test) / (Jenkins console link) |
+| Releasable PR (opened after green build) |  |
 | Build |  |
 | Status |  |
 

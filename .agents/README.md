@@ -30,6 +30,15 @@ agent enters at the root `AGENTS.md`, which sends it to `.agents/workflow.md` (t
   token is injected). If git auth fails it **halts and waits** — you can fix ambient auth or **enter a
   git username/password to continue** (cached in memory only, never written to the repo/URL); the run
   resumes only after the preflight passes. Offline / `isolation: in-place` is also offered.
+- **PRs are headless Bitbucket REST** (no browser, ever). **No `BITBUCKET_*` env vars** — base/project/slug
+  are derived from the git remote and auth reuses **git's own credential** (`git credential fill`, the same
+  creds as `git push`). On HTTP 401/403 the workflow halts and sets up the git credential
+  (`git credential approve`), then retries — it never prompts for env tokens or a browser.
+- **The CI build gate + failure diagnosis use Jenkins directly** (`JENKINS_URL` / `JENKINS_USER` /
+  `JENKINS_PASSWORD` + `JENKINS_JOB_PREFIX`, kept in `.env.local`). On a red `lastBuild`, the workflow reads
+  Jenkins console/test/stage output, classifies the failure, and **resumes the mapped stage** (test →
+  implement→test, Sonar → implement→review, deploy/infra → re-trigger/escalate) — fix loop capped at
+  `ci_fix_attempts`. The releasable PR opens only on a green Jenkins build.
 
 ## Directory map
 

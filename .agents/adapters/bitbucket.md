@@ -71,7 +71,11 @@ The change must land on **both** the integration line and the releasable line, v
    **Resolve any conflicts**, then build/test the integration worktree.
 3. **Auth preflight, then push both** branches (`feature/<BRANCH>-integration`, `feature/<BRANCH>-releasable`).
 4. **Open PR #1 → integration** (`feature/<BRANCH>-integration` → `origin/integration`).
-5. **Open PR #2 → releasable** (`feature/<BRANCH>-releasable` → `origin/releasable`).
+5. **Wait for the integration build to go green** before the next PR — `.agents/adapters/jenkins.md`
+   (poll **Jenkins** `lastBuild` via `JENKINS_*`; red → diagnose from Jenkins + fix loop capped at
+   `ci_fix_attempts` from the mapped resume stage, else HALT).
+6. **Open PR #2 → releasable** (`feature/<BRANCH>-releasable` → `origin/releasable`) — only once the
+   integration build is green.
 
 - **Integration PR is opened first**, then the releasable PR.
 - Each push and each PR is a **separate outward-facing action**: STOP for explicit approval **before the
@@ -92,8 +96,50 @@ The change must land on **both** the integration line and the releasable line, v
 - [ ] PR description has issue key, summary, changed areas, test commands+results, risks, QA notes.
 - [ ] No secrets/tokens committed.
 
-## Opening the PR
+## Opening the PR — via Bitbucket REST API (no browser, no env vars)
 
-Prepare the description, then **ask for explicit approval before pushing branches or opening the PR**.
-Link the PR back into the development log if `jira` is enabled. Pushing/opening/merging are each
-separate outward-facing actions — confirm each one.
+PRs are created **headlessly through the Bitbucket Server REST API**. **Do not attempt, wait on, or even
+mention the in-app browser — go straight to REST.** There are **no `BITBUCKET_*` env vars**: everything
+is derived from the git remote, and auth reuses **git's own credential** (the same one git uses for
+commit/push). Prepare the description, **ask for explicit approval**, then POST.
+
+### Derive everything from the remote + git credential
+
+```bash
+REMOTE=$(git -C "$M" remote get-url origin)              # https://USER@stash.turkcell.com.tr/git/scm/ec101671/<repo>.git
+NOCRED=$(printf '%s' "$REMOTE" | sed -E 's#://[^@/]+@#://#')         # strip user@
+HOST=$(printf '%s' "$NOCRED" | sed -E 's#https?://([^/]+)/.*#\1#')   # stash.turkcell.com.tr
+BASE=${NOCRED%%/scm/*}                                   # https://stash.turkcell.com.tr/git
+REST=${NOCRED#*/scm/}                                    # ec101671/<repo>.git
+PROJECT=$(printf '%s' "$REST" | cut -d/ -f1 | tr '[:lower:]' '[:upper:]')   # EC101671 (REST key is UPPERCASE)
+SLUG=$(printf '%s' "$REST" | cut -d/ -f2 | sed 's/\.git$//')
+
+# auth = git's stored credential for this host (keychain / credential helper — same as push):
+CRED=$(printf 'protocol=https\nhost=%s\npath=git\n\n' "$HOST" | git -C "$M" credential fill)
+GUSER=$(printf '%s' "$CRED" | sed -n 's/^username=//p')
+GPASS=$(printf '%s' "$CRED" | sed -n 's/^password=//p')
+```
+
+### Create the PR
+
+```bash
+curl -sS -X POST -u "$GUSER:$GPASS" -H "Content-Type: application/json" \
+  -w 'HTTP_STATUS=%{http_code}\n' -o /tmp/pr.json \
+  "$BASE/rest/api/1.0/projects/$PROJECT/repos/$SLUG/pull-requests" \
+  -d '{"title":"<KEY> <summary>","description":"…",
+       "fromRef":{"id":"refs/heads/feature/<BRANCH>-integration"},
+       "toRef":{"id":"refs/heads/integration"}}'
+```
+
+- **HTTP 401/403** → git has no usable credential for the host → **HALT** and run the credential-setup
+  flow (collect git username/password → `git credential approve`, see the git-auth preflight above) so
+  **git itself** holds the creds, then retry. **Never ask for `BITBUCKET_*` env vars.**
+- **2xx** → capture the PR URL (`.links.self[0].href`) and log it to the Jira Delivery block.
+- The build gate (`.agents/adapters/jenkins.md`) reads the source commit from the PR detail:
+  `GET $BASE/rest/api/1.0/projects/$PROJECT/repos/$SLUG/pull-requests/$PR_ID` → `.fromRef.latestCommit`.
+- **Dual-branch (R10):** open PR #1 `…-integration → integration` first, then PR #2
+  `…-releasable → releasable` — each its own approval.
+- **Cloud fallback** (if ever on Bitbucket Cloud): `POST {base}/2.0/repositories/{workspace}/{repo}/pullrequests`.
+- **Security:** credentials come from git's store only — never printed, never in a repo file, URL, or chat.
+
+Pushing/opening/merging are each separate outward-facing actions — confirm each one.

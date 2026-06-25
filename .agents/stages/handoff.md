@@ -13,8 +13,11 @@ unmet or contradicted, the job is NOT done** — report the gap instead of handi
 
 Follow `.agents/adapters/bitbucket.md`. Verify the PR-readiness checklist, prepare a description
 (issue key, behavior summary, changed areas, test commands+results, risks, QA notes), then **ask for
-explicit approval before pushing branches or opening the PR**. If `bitbucket` is not enabled, instead
-produce the same summary as text for the user to use manually.
+explicit approval before pushing branches or opening the PR**. PRs are opened **via the Bitbucket REST
+API** — **never the in-app browser** — authenticated with **git's own credential** (derived from the
+remote; `git credential fill`). No `BITBUCKET_*` env vars. On HTTP 401/403, HALT and run the
+git-credential setup, then retry. Capture each PR URL and log it. If `bitbucket` is not enabled, instead
+produce the same summary as text for the user.
 
 ### Dual-branch delivery (when `delivery: dual-branch`)
 
@@ -23,7 +26,14 @@ Run the bitbucket adapter's **Delivery model** sequence:
 2. In the **integration** worktree, `git merge feature/<BRANCH>-releasable`, **resolve conflicts**, build/test.
 3. Auth preflight → push both branches.
 4. **STOP for approval, then open PR #1 → integration.**
-5. **STOP for approval, then open PR #2 → releasable.**
+5. **Wait for the integration build** (`.agents/adapters/jenkins.md`, when `jenkins` is enabled): poll
+   **Jenkins `lastBuild`** for the integration PR (`JENKINS_URL/USER/PASSWORD` + `JENKINS_JOB_PREFIX`).
+   - **SUCCESS** → proceed to step 6.
+   - **FAILURE/UNSTABLE** → **HALT**, **diagnose from Jenkins** (consoleText / testReport / wfapi),
+     classify and **resume the mapped stage**, then run the fix loop (fix → re-merge → re-push →
+     re-build), **at most `ci_fix_attempts` (default 2)** times; if still red after the cap, **STOP for
+     the user** and do **not** open the releasable PR.
+6. **Only after the integration build is green: STOP for approval, then open PR #2 → releasable.**
 
 After each step, **append to the Jira dev log** (Delivery block + Work Done rows): both branch names,
 integration merge/conflict status, Integration PR link, Releasable PR link, in order. Two PR approval

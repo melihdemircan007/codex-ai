@@ -18,7 +18,8 @@ to the **frontend** area. For a full-stack job, write both sets against their re
 
 ## Run them
 
-- Maven module: `mvn test` (or `mvn clean verify` when integration/failsafe matters).
+- Maven module: `mvn test` (or `mvn clean verify` when integration/failsafe matters). Uses the shared
+  `~/.m2` local repo — **don't** pass `-Dmaven.repo.local` (worktree builds share the same cache).
 - Gradle module: `./gradlew test`.
 - Frontend: `npm test` (and `npm run lint`).
 - Run the **affected module(s)** only; full-workspace builds are not the default.
